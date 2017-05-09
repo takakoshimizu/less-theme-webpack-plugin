@@ -1,0 +1,22 @@
+{
+  "name": "less-theme-webpack-plugin",
+  "version": "1.0.0",
+  "description": "A plugin for turning a base theme less file into multiple themes in the webpack compilation process. Just a work requirement, and no one else will ever want to use this, most likely.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/takakoshimizu/less-theme-webpack-plugin.git"
+  },
+  "author": "Erich Dalton",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/takakoshimizu/less-theme-webpack-plugin/issues"
+  },
+  "homepage": "https://github.com/takakoshimizu/less-theme-webpack-plugin#readme",
+  "dependencies": {
+    "less": "^2.7.2"
+  }
+}

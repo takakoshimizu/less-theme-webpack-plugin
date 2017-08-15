@@ -1,6 +1,6 @@
 {
   "name": "less-theme-webpack-plugin",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A plugin for turning a base theme less file into multiple themes in the webpack compilation process. Just a work requirement, and no one else will ever want to use this, most likely.",
   "main": "index.js",
   "scripts": {

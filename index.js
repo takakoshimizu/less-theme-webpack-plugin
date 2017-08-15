@@ -4,6 +4,7 @@ const less = require('less');
 
 function LessThemeWebpackPlugin(options) {
   if (!options.sourceFile) throw new Error('[LessThemeWebpackPlugin] No source file provided.');
+  if (!options.genericFile) throw new Error('[LessThemeWebpackPlugin] No generic.less provided.');
   if (!options.themePath) throw new Error('[LessThemeWebpackPlugin] No theme directory provided.');
   if (!options.sourceChunk) throw new Error('[LessThemeWebpackPlugin] No source chunk provided.');
 
@@ -17,32 +18,37 @@ LessThemeWebpackPlugin.prototype.apply = function(compiler) {
   if (!fs.existsSync(pathToThemes)) throw new Error('[LessThemeWebpackPlugin] Path to themes is invalid.');
 
   compiler.plugin('after-compile', function(c, callback) {
-    const availableThemes = fs.readdirSync(pathToThemes)
-    .filter(function(p) { return p.endsWith('.less'); })
-    .filter(function(p) { return p !== 'base.less'; })
-    .filter(function(p) {
-      return !fs.lstatSync(path.resolve(pathToThemes, p)).isDirectory();
-    });
-
-    const addedThemeFiles = Object.keys(c.assets)
-      .filter(function(k) {
-        return k == options.sourceFile; 
-      })
-      .map(function(asset) {
-        const source = c.assets[asset].source().replace(/["']\{\{(.+?)\}\}["']/gim, "$1");
-
-        return availableThemes.map(function(theme) {
-          const themeData = fs.readFileSync(path.resolve(pathToThemes, theme));
-          const fullFile = themeData + '\n' + source;
-
-          return less.render(fullFile, { compress: true, strictMath: true })
-            .then(css => css.css)
-            .then(css => [theme, css]);
+    const availableThemes = 
+      fs.readdirSync(pathToThemes)
+        .filter(function(p) { return p.endsWith('.less'); })
+        .filter(function(p) { return p !== 'base.less'; })
+        .filter(function(p) {
+          return !fs.lstatSync(path.resolve(pathToThemes, p)).isDirectory();
         });
-      })
-      .reduce(function(acc, arr) {
-        return acc.concat(arr);
-      }, []);
+
+    const genericTheme = fs.readFileSync(path.resolve(pathToThemes, options.genericFile));
+
+    const addedThemeFiles = 
+      Object.keys(c.assets)
+        .filter(function(k) {
+          return k == options.sourceFile; 
+        })
+        .map(function(asset) {
+          const source = c.assets[asset].source().replace(/["']\{\{(.+?)\}\}["']/gim, "$1");
+
+          return availableThemes.map(function(theme) {
+            const themeData = fs.readFileSync(path.resolve(pathToThemes, theme));
+            const fullFile = (theme === options.genericFile ? '' : genericTheme + '\n') 
+              + themeData + '\n' + source;
+
+            return less.render(fullFile, { compress: true, strictMath: true })
+              .then(css => css.css)
+              .then(css => [theme, css]);
+          });
+        })
+        .reduce(function(acc, arr) {
+          return acc.concat(arr);
+        }, []);
 
     return Promise.all(addedThemeFiles).then(function(themes) {
       const newFilePath = path.dirname(options.sourceFile);

@@ -4,7 +4,7 @@
   "description": "A plugin for turning a base theme less file into multiple themes in the webpack compilation process. Just a work requirement, and no one else will ever want to use this, most likely.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "webpack"
   },
   "repository": {
     "type": "git",
@@ -16,7 +16,18 @@
     "url": "https://github.com/takakoshimizu/less-theme-webpack-plugin/issues"
   },
   "homepage": "https://github.com/takakoshimizu/less-theme-webpack-plugin#readme",
-  "dependencies": {
-    "less": "^2.7.2"
+  "dependencies": {},
+  "peerDependencies": {
+    "less": "^3.9.0",
+    "webpack": "^4.27.1"
+  },
+  "devDependencies": {
+    "css-loader": "^2.0.0",
+    "less": "^3.9.0",
+    "less-loader": "^4.1.0",
+    "memory-fs": "^0.4.1",
+    "mini-css-extract-plugin": "^0.5.0",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
   }
 }

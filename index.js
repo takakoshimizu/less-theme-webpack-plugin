@@ -17,7 +17,7 @@ LessThemeWebpackPlugin.prototype.apply = function(compiler) {
 
   if (!fs.existsSync(pathToThemes)) throw new Error('[LessThemeWebpackPlugin] Path to themes is invalid.');
 
-  compiler.plugin('after-compile', function(c, callback) {
+  compiler.hooks.afterCompile.tapPromise('less-theme-webpack-plugin', function(c) {
     const availableThemes = 
       fs.readdirSync(pathToThemes)
         .filter(function(p) { return p.endsWith('.less'); })
@@ -72,7 +72,6 @@ LessThemeWebpackPlugin.prototype.apply = function(compiler) {
         }
       }
 
-      callback();
       return themes;
     });
   });

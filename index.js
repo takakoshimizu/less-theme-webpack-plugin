@@ -17,7 +17,9 @@ LessThemeWebpackPlugin.prototype.apply = function(compiler) {
 
   if (!fs.existsSync(pathToThemes)) throw new Error('[LessThemeWebpackPlugin] Path to themes is invalid.');
 
-  compiler.hooks.afterCompile.tapPromise('less-theme-webpack-plugin', function(c) {
+  const pluginName = 'less-theme-webpack-plugin';
+
+  function renderThemes(c) {
     const availableThemes = 
       fs.readdirSync(pathToThemes)
         .filter(function(p) { return p.endsWith('.less'); })
@@ -34,7 +36,7 @@ LessThemeWebpackPlugin.prototype.apply = function(compiler) {
           return k == options.sourceFile; 
         })
         .map(function(asset) {
-          const source = c.assets[asset].source().replace(/["']\{\{(.+?)\}\}["']/gim, "$1");
+          const source = c.assets[asset].source().toString().replace(/["']\{\{(.+?)\}\}["']/gim, "$1");
 
           return availableThemes.map(function(theme) {
             const themeData = fs.readFileSync(path.resolve(pathToThemes, theme));
@@ -52,14 +54,49 @@ LessThemeWebpackPlugin.prototype.apply = function(compiler) {
 
     return Promise.all(addedThemeFiles).then(function(themes) {
       const newFilePath = path.dirname(options.sourceFile);
-      themes.forEach(function(theme) {
+      return themes.map(function(theme) {
         const newFileName = theme[0].slice(0, theme[0].lastIndexOf('.')) + '.css';
-        const newThemePath = path.join(newFilePath, newFileName);
+        return [path.join(newFilePath, newFileName), theme[1]];
+      });
+    });
+  }
 
-       c.assets[newThemePath] = {
-         source: function() { return new Buffer(theme[1]); },
-         size: function() { return Buffer.byteLength(theme[1]); }
-       }
+  if (compiler.webpack && compiler.webpack.Compilation) {
+    // webpack 5: change assets while they are being processed.
+    const Compilation = compiler.webpack.Compilation;
+    const RawSource = compiler.webpack.sources.RawSource;
+
+    compiler.hooks.thisCompilation.tap(pluginName, function(c) {
+      c.hooks.processAssets.tapPromise(
+        { name: pluginName, stage: Compilation.PROCESS_ASSETS_STAGE_DERIVED },
+        function() {
+          return renderThemes(c).then(function(themes) {
+            if (!themes.length) return themes;
+
+            themes.forEach(function(theme) {
+              c.emitAsset(theme[0], new RawSource(theme[1]));
+            });
+
+            // remove base theme (deleteAsset also removes it from its chunks)
+            c.deleteAsset(options.sourceFile);
+
+            return themes;
+          });
+        }
+      );
+    });
+    return;
+  }
+
+  // webpack 4
+  compiler.hooks.afterCompile.tapPromise(pluginName, function(c) {
+    return renderThemes(c).then(function(themes) {
+      themes.forEach(function(theme) {
+        const buffer = Buffer.from(theme[1]);
+        c.assets[theme[0]] = {
+          source: function() { return buffer; },
+          size: function() { return buffer.length; }
+        };
       });
 
       // remove base theme

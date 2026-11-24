@@ -16,18 +16,16 @@
     "url": "https://github.com/takakoshimizu/less-theme-webpack-plugin/issues"
   },
   "homepage": "https://github.com/takakoshimizu/less-theme-webpack-plugin#readme",
-  "dependencies": {},
   "peerDependencies": {
-    "less": "^3.9.0",
-    "webpack": "^4.27.1"
+    "less": "^3.9.0 || ^4.0.0",
+    "webpack": "^4.27.1 || ^5.0.0"
   },
   "devDependencies": {
-    "css-loader": "^2.0.0",
-    "less": "^3.9.0",
-    "less-loader": "^4.1.0",
-    "memory-fs": "^0.4.1",
-    "mini-css-extract-plugin": "^0.5.0",
-    "webpack": "^4.27.1",
-    "webpack-cli": "^3.1.2"
+    "css-loader": "^7.1.5",
+    "less": "^4.9.1",
+    "less-loader": "^13.1.1",
+    "mini-css-extract-plugin": "^2.10.2",
+    "webpack": "^5.113.0",
+    "webpack-cli": "^7.3.1"
   }
 }
